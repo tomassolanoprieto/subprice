@@ -1,0 +1,41 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  role          String    // "user" | "provider" | "admin"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bills         Bill[]
+  providerProfile Provider?
+}
+
+model Bill {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Float
+  consumption Float?
+  provider    String
+  period      String
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Provider {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  name        String
+  sectors     String[] // ["energy", "communications", "alarms"]
+  status      String   // "active" | "pending" | "inactive"
+  provinces   String[]
+  operations  Int      @default(0)
+  revenue     Float    @default(0)
+  user        User     @relation(fields: [userId], references: [id])
+}
